@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Apresentação — Projeto Interativo</title>
+<style>
+  :root {
+    --gap-bottom: 22px;
+    --controls-height: 72px;
+    --controls-hide-translate: 120%;
+    --slide-up-amount: 28px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html,body {
+    height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: "Poppins", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  #slides {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 1;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .slide.active { display: flex; animation: fadeIn .45s ease both; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-content {
+    position: relative;
+    width: min(900px, 96%);
+    max-height: calc(100vh - 160px);
+    background: rgba(0,0,0,0.45);
+    padding: 26px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    z-index: 2;
+    overflow-y: auto;
+    text-align: center;
+    transition: transform .3s ease;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slide-content h2 { font-size: 1.9rem; margin-bottom: 10px; }
+  .slide-content p { font-size: 1.05rem; line-height: 1.6; opacity: .96; word-wrap: break-word; }
+
+  .slide::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.36);
+    z-index: 1;
+  }
+
+  .slide-inner-frame {
+    position: absolute;
+    inset: 12px;
+    border-radius: 14px;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+  }
+
+  #controls-bar {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: var(--gap-bottom);
+    z-index: 10020;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(0,0,0,0.45);
+    padding: 10px 14px;
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+    transition: transform .35s cubic-bezier(.2,.9,.2,1), opacity .35s ease;
+    will-change: transform, opacity;
+    align-self: center;
+  }
+
+  #controls-bar.hidden {
+    transform: translateX(-50%) translateY(var(--controls-hide-translate));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ctrl-btn {
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    min-width: 52px;
+    display: inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    transition: transform .18s ease, background .18s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent; /* remove fundo azul em mobile */
+  }
+
+  .ctrl-btn:hover, .ctrl-btn:focus {
+    transform: translateY(-4px);
+    background: rgba(255,255,255,0.12);
+    outline: none;
+    box-shadow: none;
+  }
+
+  .ctrl-btn:active {
+    background: rgba(255,255,255,0.12);
+  }
+
+  .controls-visible .slide-content {
+    transform: translateY(calc(-1 * var(--slide-up-amount)));
+  }
+
+  #bloqueio {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    color: #fff;
+    z-index: 9998;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding: 24px;
+    text-align:center;
+    font-size: 1.1rem;
+    transition: opacity .25s ease;
+    pointer-events: auto;
+  }
+  #bloqueio.hidden { opacity: 0; pointer-events: none; }
+
+  #creditos {
+    position: fixed;
+    right: 12px;
+    bottom: 6px;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.65);
+    user-select: none;
+    z-index: 10050;
+  }
+
+  @media (max-width:720px) {
+    .slide-content { padding: 18px 16px; max-height: calc(100vh - 140px); width: 94%; }
+    #controls-bar { padding: 8px 10px; gap: 10px; }
+    .ctrl-btn { padding: 9px 10px; font-size: .98rem; min-width: 44px; }
+  }
+</style>
+</head>
+<body>
+
+  <div id="bloqueio" class="hidden" aria-hidden="true">
+    <p style="max-width:720px; padding: 0 20px;">
+      📱 Gire seu celular para o modo <strong>horizontal</strong> para continuar.
+    </p>
+  </div>
+
+  <div id="slides" aria-hidden="true">
+    <div class="slide" data-bg="img/image1.jpg" style="background-image: url('img/image1.jpg');">
+      <div class="slide-inner-frame"></div>
+      <div class="slide-content" role="article" tabindex="0">
+        <h2>Introdução</h2>
+        <p>
+          Bem-vindo à nossa apresentação! Aqui mostraremos o desenvolvimento do nosso projeto e suas etapas principais.
+          Este texto foi projetado para ser longo o suficiente para testar a rolagem interna da caixa de conteúdo sem quebrar o layout.
+          Você pode rolar o conteúdo dentro desta caixa — o slide mantém a imagem em cover ocupando toda a tela, enquanto
+          o conteúdo possui margens internas e não encosta nas bordas.
+        </p>
+      </div>
+    </div>
+
+    <div class="slide" data-bg="img/image2.jpg" style="background-image: url('img/image2.jpg');">
+      <div class="slide-inner-frame"></div>
+      <div class="slide-content" role="article" tabindex="0">
+        <h2>Objetivo</h2>
+        <p>
+          Nosso objetivo é criar uma experiência digital interativa e envolvente, demonstrando criatividade, fluxos e
+          conceitos. Teste com vários parágrafos, listas ou elementos — o contêiner comporta rolagem interna para textos longos.
+        </p>
+      </div>
+    </div>
+
+    <div class="slide" data-bg="img/image3.jpg" style="background-image: url('img/image3.jpg');">
+      <div class="slide-inner-frame"></div>
+      <div class="slide-content" role="article" tabindex="0">
+        <h2>Conclusão</h2>
+        <p>
+          Esperamos que gostem da apresentação. Todos os botões ficam juntos no rodapé; desaparecem após 3s de inatividade
+          e, ao reaparecerem, fazem o conteúdo subir levemente para não ficar encostando neles.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls-bar" class="hidden" role="region" aria-label="Controles da apresentação">
+    <button class="ctrl-btn" id="btn-prev" title="Anterior">◀</button>
+    <button class="ctrl-btn" id="btn-next" title="Próximo">▶</button>
+    <button class="ctrl-btn" id="btn-full" title="Tela cheia">⛶</button>
+  </div>
+
+  <div id="creditos">© Todos os direitos reservados - Josué</div>
+
+<script>
+(() => {
+  const slidesRoot = document.getElementById('slides');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const controlsBar = document.getElementById('controls-bar');
+  const bloqueio = document.getElementById('bloqueio');
+
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const btnFull = document.getElementById('btn-full');
+
+  let current = 0;
+  let inactivityTimer = null;
+  const INACTIVITY_MS = 3000;
+
+  function showSlide(i) {
+    if (i < 0) i = slides.length - 1;
+    if (i >= slides.length) i = 0;
+    current = i;
+    slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === current);
+    });
+    if (!controlsBar.classList.contains('hidden')) {
+      document.documentElement.classList.add('controls-visible');
+    }
+  }
+
+  function showControls() {
+    controlsBar.classList.remove('hidden');
+    document.documentElement.classList.add('controls-visible');
+    resetInactivityTimer();
+  }
+
+  function hideControls() {
+    controlsBar.classList.add('hidden');
+    document.documentElement.classList.remove('controls-visible');
+  }
+
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      hideControls();
+    }, INACTIVITY_MS);
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(()=>{});
+    } else {
+      document.exitFullscreen?.().catch(()=>{});
+    }
+  }
+
+  function checkOrientation() {
+    if (window.innerHeight > window.innerWidth) {
+      bloqueio.classList.remove('hidden');
+      bloqueio.setAttribute('aria-hidden','false');
+      slidesRoot.style.display = 'none';
+    } else {
+      bloqueio.classList.add('hidden');
+      bloqueio.setAttribute('aria-hidden','true');
+      slidesRoot.style.display = 'block';
+      showSlide(current);
+      showControls();
+    }
+  }
+
+  btnPrev.addEventListener('click', () => { showSlide(current - 1); showControls(); });
+  btnNext.addEventListener('click', () => { showSlide(current + 1); showControls(); });
+  btnFull.addEventListener('click', () => { toggleFullscreen(); showControls(); });
+
+  ['mousemove','touchstart','touchmove','wheel','keydown'].forEach(ev => {
+    window.addEventListener(ev, () => { 
+      if (slidesRoot.style.display !== 'none') showControls();
+    }, { passive: true });
+  });
+
+  function init() {
+    slides.forEach(s => s.classList.remove('active'));
+    slides.forEach(s => {
+      const content = s.querySelector('.slide-content');
+      if (content) content.setAttribute('tabindex','0');
+    });
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+  }
+  init();
+
+  window._presentation = { showSlide };
+
+})();
+</script>
+</body>
+</html>
